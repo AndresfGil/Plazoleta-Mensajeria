@@ -1,7 +1,7 @@
-package co.com.bancolombia.consumer;
+package co.com.bancolombia.api.dto;
 
-import lombok.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,8 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class ObjectResponse {
-
-    private String state;
-
+public class MensajeResponse {
+    private String status;
+    private String message;
 }

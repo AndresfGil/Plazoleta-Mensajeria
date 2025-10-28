@@ -1,47 +1,110 @@
-# Proyecto Base Implementando Clean Architecture
+# Microservicio de Mensajería - Twilio SMS
 
-## Antes de Iniciar
+Este microservicio implementa la funcionalidad de envío de mensajes SMS utilizando Twilio, siguiendo la arquitectura hexagonal de Bancolombia.
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
+## Funcionalidades
 
-Lee el artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+- Envío de mensajes SMS a través de Twilio
+- Circuit breaker para manejo de fallos
+- Endpoint REST para recibir solicitudes de envío
+- Manejo de errores y respuestas estructuradas
 
-# Arquitectura
+## Configuración
 
-![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
+### Variables de Entorno
 
-## Domain
+Configura las siguientes variables de entorno antes de ejecutar la aplicación:
 
-Es el módulo más interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio mediante modelos y entidades del dominio.
+```bash
+export TWILIO_ACCOUNT_SID=your_twilio_account_sid
+export TWILIO_AUTH_TOKEN=your_twilio_auth_token
+export TWILIO_FROM_NUMBER=+1234567890
+```
 
-## Usecases
+### Configuración en application.yaml
 
-Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de entities.
+Las credenciales también se pueden configurar directamente en el archivo `application.yaml`:
 
-## Infrastructure
+```yaml
+twilio:
+  account-sid: "your_account_sid_here"
+  auth-token: "your_auth_token_here"
+  from-number: "+1234567890"
+```
 
-### Helpers
+## Uso del API
 
-En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
+### Endpoint de Envío de Mensajes
 
-Estas utilidades no están arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genéricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrón de diseño [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
+**POST** `/api/mensaje/enviar`
 
-Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
+#### Request Body
 
-### Driven Adapters
+```json
+{
+  "telefono": "+573001234567",
+  "mensaje": "Tu pedido está listo. Tu PIN es 8456."
+}
+```
 
-Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
-soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
-interactuar.
+#### Response Success (200)
 
-### Entry Points
+```json
+{
+  "status": "success",
+  "message": "Mensaje enviado exitosamente"
+}
+```
 
-Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
+#### Response Error (500)
 
-## Application
+```json
+{
+  "status": "error",
+  "message": "Error enviando mensaje: [descripción del error]"
+}
+```
 
-Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
+## Ejecución
 
-**Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+### Desarrollo
+
+```bash
+./gradlew bootRun
+```
+
+### Construcción
+
+```bash
+./gradlew build
+```
+
+### Ejecutar Tests
+
+```bash
+./gradlew test
+```
+
+## Arquitectura
+
+El proyecto sigue la arquitectura hexagonal con las siguientes capas:
+
+- **Domain**: Modelos y casos de uso
+- **Infrastructure**: Adaptadores para Twilio y API REST
+- **Application**: Configuración y punto de entrada
+
+## Circuit Breaker
+
+El servicio incluye un circuit breaker configurado para manejar fallos en la comunicación con Twilio:
+
+- **Failure Rate Threshold**: 50%
+- **Slow Call Duration Threshold**: 5s
+- **Wait Duration in Open State**: 30s
+- **Minimum Number of Calls**: 5
+
+## Dependencias Principales
+
+- Spring Boot 3.5.4
+- Twilio SDK 9.12.0
+- Resilience4j para circuit breaker
+- Lombok para reducción de código boilerplate

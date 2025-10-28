@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 spring:
   application:
     name: "Mensajeria"
@@ -13,7 +13,11 @@ spring:
     include: null
 adapter:
   restconsumer:
-    url: "http://localhost:8080"
+    url: "http://localhost:8082"
+twilio:
+  account-sid: "${TWILIO_ACCOUNT_SID:ACa319f4a1df19bb25ddb3d9757cb4d2a2}"
+  auth-token: "${TWILIO_AUTH_TOKEN:50734d3a3f06ad5cade27107f040eee2}"
+  from-number: "${TWILIO_FROM_NUMBER:+19787651656}"
 management:
   health:
     circuitbreakers:
@@ -29,23 +33,14 @@ management:
 resilience4j:
   circuitbreaker:
     instances:
-      testGet:
+      twilioSms:
         registerHealthIndicator: true
         failureRateThreshold: 50
         slowCallRateThreshold: 50
-        slowCallDurationThreshold: "2s"
+        slowCallDurationThreshold: "5s"
         permittedNumberOfCallsInHalfOpenState: 3
         slidingWindowSize: 10
-        minimumNumberOfCalls: 10
-        waitDurationInOpenState: "10s"
-      testPost:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        slowCallRateThreshold: 50
-        slowCallDurationThreshold: "2s"
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 10
-        waitDurationInOpenState: "10s"
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: "30s"
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8082"
