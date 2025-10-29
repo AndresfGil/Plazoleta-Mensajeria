@@ -14,10 +14,7 @@ spring:
 adapter:
   restconsumer:
     url: "http://localhost:8082"
-twilio:
-  account-sid: "${TWILIO_ACCOUNT_SID:ACa319f4a1df19bb25ddb3d9757cb4d2a2}"
-  auth-token: "${TWILIO_AUTH_TOKEN:50734d3a3f06ad5cade27107f040eee2}"
-  from-number: "${TWILIO_FROM_NUMBER:+19787651656}"
+
 management:
   health:
     circuitbreakers:
